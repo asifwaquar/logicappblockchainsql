@@ -1,0 +1,14 @@
+
+# dependencies
+node_modules
+
+mypasskey.env
+
+# testing
+coverage
+
+# truffle
+build
+
+# environment variables
+.env

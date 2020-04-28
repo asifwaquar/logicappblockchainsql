@@ -1,0 +1,70 @@
+{
+     "parameters": {
+        "$connections": {
+        "value": {
+            "blockchainethereum": {
+                "connectionId": "/subscriptions/014cae1c-b4b3-42c4-a160-06fb0f77eea8/resourceGroups/",
+                "connectionName": "",
+                "id": "/subscriptions/014cae1c-b4b3-42c4-a160-06fb0f77eea8/providers/Microsoft.Web/locations/westeurope/managedApis/blockchainethereum"
+            },
+            "sql": {
+                "connectionId": "/subscriptions/014cae1c-b4b3-42c4-a160-06fb0f77eea8/resourceGroups/",
+                "connectionName": "",
+                "id": "/subscriptions/014cae1c-b4b3-42c4-a160-06fb0f77eea8/providers/Microsoft.Web/locations/westeurope/managedApis/sql"
+            }
+        }
+        }
+    },
+    "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+                "$connections": {
+                    "defaultValue": {
+                    },
+            "type": "Object"
+        }
+    },
+        "triggers": {
+            "When_a_smart_contract_event_occurs": {
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['blockchainethereum']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/contract/OnNewEvent",
+                    "queries": {
+                            "abi": "[{\"inputs\":[{\"internalType\":\"string\",\"name\":\"message\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"stateData\",\"type\":\"string\"}],\"name\":\"StateChanged\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"RequestMessage\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"Requestor\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"Responder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"ResponseMessage\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"State\",\"outputs\":[{\"internalType\":\"enum HelloBlockchain.StateType\",\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"string\",\"name\":\"requestMessage\",\"type\":\"string\"}],\"name\":\"SendRequest\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"string\",\"name\":\"responseMessage\",\"type\":\"string\"}],\"name\":\"SendResponse\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+"contractAddress": "0x0385d4f771D4195a7DD6070022c3a6aCF186BfD0",
+"eventName": "StateChanged"
+        }
+                },
+                "recurrence": {
+                    "frequency": "Minute",
+                    "interval": 3
+                },
+                "type": "ApiConnection"
+            }
+        },
+"actions": {
+            "Insert_row": {
+                "inputs": {
+                    "body": {
+                        "stateData": "@triggerBody()?['stateData']"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['sql']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/datasets/default/tables/@{encodeURIComponent(encodeURIComponent('[dbo].[StateChanged]'))}/items"
+                },
+                "runAfter": {},
+                "type": "ApiConnection"
+            }
+        }
+    }
+}
